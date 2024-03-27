@@ -33,15 +33,15 @@ public class App {
     }
 
     //TODO!!!!!!!May edit later, check keywords and userid match
-    public void logIn() throws IOException{
-        boolean status = controller.logIn();
-        if(status==true){
-            return;
-        }
-        else{
-            logIn();
-        }
-    }
+    // public void logIn() throws IOException{
+    //     boolean status = controller.logIn();
+    //     if(status==true){
+    //         return;
+    //     }
+    //     else{
+    //         logIn();
+    //     }
+    // }
 
     /**
      * Adds students to a course.
@@ -109,7 +109,7 @@ public class App {
         switch(cmd){
             case 1:
                 int courseID = professor.getCourses().size();
-                Course newCourse = controller.readNewCourse(Integer.toString(courseID), professor, new ArrayList<Student>());
+                Course newCourse = controller.readNewCourse(Integer.toString(courseID), professor);
                 professor.addCourse(newCourse);
                 break;
             case 2:
@@ -142,11 +142,11 @@ public class App {
     public static void main(String[] args) throws IOException {
         BufferedReader input = new BufferedReader(new InputStreamReader(System.in));
         TextUserController controller = new TextUserController(input, System.out);
-        University university = controller.readUniversity();//TODO!!!!
-        Professor user = controller.register(university);//TODO!!!!
-        //Professor user = controller.readNewProfessor();
+        // University university = controller.readUniversity();//TODO!!!!
+        // Professor user = controller.register(university);//TODO!!!!
+        Professor user = controller.readNewProfessor();
         App app = new App(user, controller);
-        app.logIn();
+        // app.logIn();
         app.welcome();
     }
 }

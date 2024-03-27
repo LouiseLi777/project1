@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.util.ArrayList;
 
-import com.opencsv.CSVReader;
 
 
 /**
@@ -132,9 +131,10 @@ public class TextUserController {
      * @return The new Course object created from the user's input.
      * @throws IOException We will not handle this exception.
      */
-    public Course readNewCourse(String id, Professor pro, ArrayList<Student> students) throws IOException {
+    public Course readNewCourse(String id, Professor pro) throws IOException {
         String prompt = "You are adding new Course, please provide the required info:\nWhat's the course's name";
         String name = printPromptAndRead(prompt);
+        ArrayList<Student> students = loadStudents();
         Course newCourse = new Course(id, name, pro, students);
         return newCourse;
     }
@@ -149,10 +149,10 @@ public class TextUserController {
         prompt = prompt + "Currently you need to do some actions, please type the number of your desired action:\n";
         ArrayList<String> actions = new ArrayList<>();
         actions.add("1. add Course\n");
-        actions.add("2. add Students to Course\n");
+        actions.add("2. add Students to Course manually\n");
         actions.add("3. start a new Lecture from one Course,then take attenace records\n");
-        actions.add("4. print students from one course\n");
-        actions.add("5. quit the program.\n");
+        actions.add("7. print students from one course\n");
+        actions.add("8. quit the program.\n");
         for (String action : actions) {
             prompt = prompt + action;
         }
@@ -247,68 +247,111 @@ public class TextUserController {
         return false;
     }
 
-    public int fileColumns(CSVReader csv) throws Exception{
-        return csv.readNext().length;
+    public String[] readLines(String line, String separator){
+        String [] tokens = line.split(separator);
+        return tokens;
+    }
+
+    public int fileColumns(String line,String separator){
+        int count = 0;
+        if(line.length()>0){
+            count+=1;
+        }
+        int idx = 0;
+        while ((idx = line.indexOf(separator,idx)) != -1) {
+            count+=1;
+            idx += separator.length();
+        }
+        return count;
     }
 
     public ArrayList<Integer> readColumns(int size, String ... ansStr) throws Exception{
         ArrayList<Integer> ans = new ArrayList<>();
         for(String s:ansStr){
             int idx = Integer.parseInt(s);
-            if(idx>=size || idx<0){
+            if(idx>size || idx<=0){
                 throw new IOException("No such column!");
             }
-            ans.add(idx);
+            ans.add(idx-1);
         }
         return ans;
     }
 
     //Working on it!
-    public ArrayList<Student> readStudents(CSVReader csv) throws Exception{
-        String ansln = printPromptAndRead("Which column is for legal name?");
+    public ArrayList<Student> readStudents(ArrayList<String> lines) throws Exception{
+        String ansln = printPromptAndRead("Which column is for legal name? Remember, column starts from 1.");
         String ansuid = printPromptAndRead("Which column is for uid of this student?");
         String ansemail = printPromptAndRead("Which column is for email?");
         String ansdn = printPromptAndRead("Which column is for display name? If not, please select the same column with legal name");
-        int columns = fileColumns(csv);
+        String separater = printPromptAndRead("Which separator in this file?");
+        int columns = fileColumns(lines.get(0),separater);
         ArrayList<Integer> ans = readColumns(columns,ansln,ansuid,ansemail,ansdn);
         ArrayList<Student> newStudents =  new ArrayList<Student>();
-        String[] nextLine; 
-        while ((nextLine = csv.readNext()) != null) { 
-            Student newStudent = new Student(nextLine[ans.get(0)], nextLine[ans.get(1)],nextLine[ans.get(2)], nextLine[ans.get(3)]);
+        for (String line:lines) { 
+            String []lineTokens = readLines(line, separater);
+            Student newStudent = new Student(lineTokens[ans.get(0)], lineTokens[ans.get(1)],lineTokens[ans.get(2)], lineTokens[ans.get(3)]);
             newStudents.add(newStudent);
         }
         return newStudents;
     }
 
     //ask specific format of the csv 
-    public ArrayList<Student> readCSVFiles() throws IOException{
+    public ArrayList<Student> readCSVFiles() throws Exception{
         String prompt = "what is your path?";//path?
         String ans = printPromptAndRead(prompt);
-        ArrayList<Student> newStudents = new ArrayList<>();
+        ArrayList<Student> newStudents;
+        ArrayList<String> lines = new ArrayList<>();
+        FileReader filereader;
+        BufferedReader breader;
         try{
-            FileReader filereader = new FileReader(ans); 
-            //ask header?
+            try{
+                filereader = new FileReader(ans); 
+                breader = new BufferedReader(filereader);
+            }
+            catch(IOException e){
+                out.println(e.getMessage());
+                String rsp = printPromptAndRead("cannot read the file, y for loading again, else return");
+                if(rsp.equals("y")){
+                    return readCSVFiles();
+                }
+                return new ArrayList<Student>();
+            }
+            String line;
             boolean header = askHeader();
-            CSVReader csvreader = new CSVReader(filereader);
-            
+            if(header){
+                breader.readLine();
+            }
+            while((line = breader.readLine())!=null){
+                lines.add(line);
+            }
+            breader.close();
             //ask each column responds to what?
+            newStudents = readStudents(lines);
             return newStudents;
         }
-        catch(IOException e){
+        catch(Exception e){
             out.println(e.getMessage());
-            out.println("cannot read the file, please give a valid file");
-            return readCSVFiles();
+            String res = printPromptAndRead("Do you want to repeat loading? y for yes");
+            if(res.equals("y")){
+                return readCSVFiles();
+            }
+            return new ArrayList<Student>();
         }
     }
 
-    public ArrayList<Student> loadStudents() throws IOException{
-        ArrayList<Student> students =  new ArrayList<>();
-        String prompt = "whether to load students? y for yes";
-        String ans = printPromptAndRead(prompt);
-        if(ans.equals("y")){
-            students = readCSVFiles();
+    public ArrayList<Student> loadStudents(){
+        try{
+            ArrayList<Student> students =  new ArrayList<>();
+            String prompt = "whether to load students? y for yes";
+            String ans = printPromptAndRead(prompt);
+            if(ans.equals("y")){
+                students = readCSVFiles();
+            }
+            return students;
         }
-        return students;
+        catch(Exception e){
+           return loadStudents();
+        }
     }
 
 
