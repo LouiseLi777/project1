@@ -47,17 +47,17 @@ public class TextUserController {
     }
 
     //TODO: All of them should be done, feel free to use current methods
-    public University readUniversity() throws IOException{
+    // public University readUniversity() throws IOException{
 
-    }
+    // }
 
-    public Professor register(University university) throws IOException{
+    // public Professor register(University university) throws IOException{
 
-    }
+    // }
 
-    public boolean logIn() throws IOException{
+    // public boolean logIn() throws IOException{
 
-    }
+    // }
 
     /**
      * Reads the user's input for a new Student.

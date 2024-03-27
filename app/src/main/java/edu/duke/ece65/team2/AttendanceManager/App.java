@@ -118,13 +118,13 @@ public class App {
             case 3:
                 startNewLecture();
                 break;
-            case 4:
-                updateStudentsRecords();//TODO!!! I will do that - Louise. If displayAttendanceFromCourse() finish I will update to it too.
-                break;
-            case 5:
-                changeStudentDisplayName();//TODO!!
-            case 6:
-                displayAttendanceFromCourse();//TODO!! 
+            // case 4:
+            //     updateStudentsRecords();//TODO!!! I will do that - Louise. If displayAttendanceFromCourse() finish I will update to it too.
+            //     break;
+            // case 5:
+            //     changeStudentDisplayName();//TODO!!
+            // case 6:
+            //     displayAttendanceFromCourse();//TODO!! 
             case 7:
                 displayStudentsFromCourse();
                 break;
